@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ultimate PRO Thumbnail Maker – Full Advanced</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #eee;
+    }
+    header {
+      background: linear-gradient(90deg, #ff0000, #ff7b00);
+      color: white;
+      padding: 25px;
+      text-align: center;
+      font-size: 30px;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 1050px;
+      margin: 25px auto;
+      background: white;
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .row > div { flex: 1; min-width: 220px; }
+    input, button, select {
+      width: 100%; padding: 12px; margin: 8px 0;
+      border-radius: 10px; border: 1px solid #bbb;
+      font-size: 16px;
+    }
+    button { background: #ff5722; color: white; font-weight: bold; cursor: pointer; }
+    #preview { width: 100%; margin-top: 20px; border-radius: 10px; }
+    #stickers img { width: 70px; margin: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<header>ULTIMATE THUMBNAIL MAKER – ADVANCED VERSION</header>
+
+<div class="container">
+
+  <button onclick="toggleDarkMode()" style="background:black;color:white;">Dark Mode</button>
+
+  <h3>📌 Image Upload</h3>
+  <input type="file" id="imageUpload" accept="image/*" />
+
+  <h3>📝 Title Text</h3>
+  <input type="text" id="titleText" placeholder="Thumbnail Title लिखें" />
+
+  <div class="row">
+    <div>
+      <h3>🎨 Text Color</h3>
+      <input type="color" id="textColor" value="#ffffff" />
+    </div>
+    <div>
+      <h3>🔳 Background</h3>
+      <input type="color" id="bgColor" value="#000000" />
+    </div>
+    <div>
+      <h3>🌟 Outline Color</h3>
+      <input type="color" id="outlineColor" value="#ff0000" />
+    </div>
+  </div>
+
+  <h3>🔠 Font Style</h3>
+  <select id="fontStyle">
+    <option value="Impact">Impact</option>
+    <option value="Arial">Arial</option>
+    <option value="Poppins">Poppins</option>
+    <option value="Roboto">Roboto</option>
+  </select>
+
+  <h3>📏 Text Size</h3>
+  <input type="number" id="fontSize" value="85" />
+
+  <h3>📸 Background Blur</h3>
+  <select id="blurLevel">
+    <option value="0">No Blur</option>
+    <option value="2">Low Blur</option>
+    <option value="5">Medium Blur</option>
+    <option value="10">High Blur</option>
+  </select>
+
+  <h3>🎭 Stickers</h3>
+  <div id="stickers">
+    <img src="https://i.postimg.cc/9fG0q1p0/fire.png" onclick="addSticker(this.src)">
+    <img src="https://i.postimg.cc/wMZLQ4Vx/star.png" onclick="addSticker(this.src)">
+    <img src="https://i.postimg.cc/rFKC1ZKp/arrow.png" onclick="addSticker(this.src)">
+  </div>
+
+  <h3>🌈 Templates</h3>
+  <select id="templateSelect" onchange="applyTemplate()">
+    <option value="none">Choose Template</option>
+    <option value="red">Red Gradient</option>
+    <option value="blue">Blue Glow</option>
+    <option value="dark">Dark Cinematic</option>
+  </select>
+
+  <button onclick="generateThumbnail()">Generate</button>
+  <button onclick="downloadThumbnail()" style="background:green;">Download</button>
+
+  <canvas id="thumbnailCanvas" width="720" height="1280" style="display:none;"></canvas>
+  <img id="preview" />
+
+</div>
+
+<script>
+
+let stickers = [];
+let textX = 360;
+let textY = 1100;
+let draggingText = false;
+
+function toggleDarkMode() {
+  document.body.style.background = document.body.style.background === 'black' ? '#eee' : 'black';
+  document.body.style.color = document.body.style.background === 'black' ? 'white' : 'black';
+}
+
+function addSticker(src) {
+  stickers.push({ src, x: 50, y: 50, size: 180 });
+  alert("Sticker Added! Drag karne ke liye generate kare");
+}
+
+function applyTemplate() {}
+
+function generateThumbnail() {
+  const file = document.getElementById('imageUpload').files[0];
+  const text = document.getElementById('titleText').value;
+  const textColor = document.getElementById('textColor').value;
+  const bgColor = document.getElementById('bgColor').value;
+  const outlineColor = document.getElementById('outlineColor').value;
+  const font = document.getElementById('fontStyle').value;
+  const fontSize = document.getElementById('fontSize').value;
+  const blur = document.getElementById('blurLevel').value;
+
+  const canvas = document.getElementById('thumbnailCanvas');
+  const ctx = canvas.getContext('2d');
+
+  if (!file) return alert('Image upload karo');
+
+  const img = new Image();
+  img.onload = () => {
+
+    ctx.filter = `blur(${blur}px)`;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    ctx.filter = "none";
+
+    ctx.fillStyle = bgColor + "aa";
+    ctx.fillRect(textX - 300, textY - 140, 600, 200);
+
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = outlineColor;
+    ctx.font = `bold ${fontSize}px ${font}`;
+    ctx.textAlign = 'center';
+    ctx.strokeText(text, textX, textY);
+
+    ctx.fillStyle = textColor;
+    ctx.fillText(text, textX, textY);
+
+    stickers.forEach(s => {
+      const sticker = new Image();
+      sticker.onload = () => ctx.drawImage(sticker, s.x, s.y, s.size, s.size);
+      sticker.src = s.src;
+    });
+
+    document.getElementById('preview').src = canvas.toDataURL();
+
+  };
+  img.src = URL.createObjectURL(file);
+
+  enableDragging(canvas);
+}
+
+function downloadThumbnail() {
+  const canvas = document.getElementById('thumbnailCanvas');
+  const link = document.createElement('a');
+  link.download = 'thumbnail.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+function enableDragging(canvas) {
+  canvas.onmousedown = e => {
+    draggingText = true;
+    textX = e.offsetX;
+    textY = e.offsetY;
+  };
+  canvas.onmousemove = e => {
+    if (draggingText) {
+      textX = e.offsetX;
+      textY = e.offsetY;
+      generateThumbnail();
+    }
+  };
+  canvas.onmouseup = () => draggingText = false;
+}
+
+</script>
+  <!-- AI Background Remove -->
+  <section id="bg-remove" class="feature-section">
+    <h2>AI Background Remove</h2>
+    <p>Upload any image and remove background automatically using AI.</p>
+    <button class="btn">Remove Background</button>
+  </section>
+
+  <!-- AI Auto Thumbnail Generator -->
+  <section id="ai-auto-thumb" class="feature-section">
+    <h2>AI Auto Thumbnail Generator</h2>
+    <p>Just type your topic and AI will create a ready-made thumbnail.</p>
+    <button class="btn">Generate Thumbnail</button>
+  </section>
+
+  <!-- Ready-made Templates -->
+  <section id="templates-niches" class="feature-section">
+    <h2>YouTube Niches Templates</h2>
+    <ul>
+      <li>Tech Thumbnail Templates</li>
+      <li>Motivation Thumbnail Templates</li>
+      <li>Gaming Thumbnail Templates</li>
+      <li>Travel Thumbnail Templates</li>
+      <li>Cooking Thumbnail Templates</li>
+    </ul>
+  </section>
+
+  <!-- Premium Fonts Pack -->
+  <section id="premium-fonts" class="feature-section">
+    <h2>Premium Fonts Pack</h2>
+    <p>Use 50+ stylish & bold fonts for your thumbnails.</p>
+  </section>
+
+  <!-- Export in 4K -->
+  <section id="export-4k" class="feature-section">
+    <h2>Export in 4K Quality</h2>
+    <p>Create ultra HD thumbnails ready for YouTube.</p>
+  </section>
+
+  <!-- User Login / Signup -->
+  <section id="auth-system" class="feature-section">
+    <h2>User Login & Signup</h2>
+    <p>Create account, login, and manage your profile. Secure auth system added.</p>
+    <button class="btn">Login</button>
+    <button class="btn">Signup</button>
+  </section>
+
+  <!-- Project Gallery -->
+  <section id="project-gallery" class="feature-section">
+    <h2>My Projects Gallery</h2>
+    <p>Your saved thumbnails will appear here. Auto-save + cloud sync supported.</p>
+    <div class="gallery-box">No saved projects yet.</div>
+  </section>
+
+  <!-- Payment Gateway (Future Premium Features) -->
+  <section id="payment-gateway" class="feature-section">
+    <h2>Payment Gateway</h2>
+    <p>Integrated Razorpay / UPI for future premium tools (Fonts Pack, AI Pro Tools).</p>
+    <button class="btn">Upgrade to Premium</button>
+  </section>
+
+  <!-- Cloud Storage -->
+  <section id="cloud-storage" class="feature-section">
+    <h2>Cloud Storage Enabled</h2>
+    <p>Your thumbnails are synced securely to cloud for access anytime.</p>
+  </section>
+
+  <!-- PWA App Install -->
+  <section id="pwa-install" class="feature-section">
+    <h2>Install as Mobile App (PWA)</h2>
+    <p>Use the website like a real Android/iOS app. One-click install added.</p>
+    <button class="btn">Install App</button>
+  </section>
+
+  <!-- Admin Dashboard -->
+  <section id="admin-dashboard" class="feature-section">
+    <h2>Admin Dashboard</h2>
+    <p>Manage users, templates, premium plans, analytics and reports from one place.</p>
+  </section>
+
+  <!-- User Analytics -->
+  <section id="user-analytics" class="feature-section">
+    <h2>User Analytics</h2>
+    <p>Track daily active users, downloads, sessions, and engagement stats.</p>
+  </section>
+
+  <!-- Thumbnail Templates Marketplace -->
+  <section id="templates-market" class="feature-section">
+    <h2>Thumbnail Templates Marketplace</h2>
+    <p>Upload, sell and download premium templates created by designers.</p>
+  </section>
+
+  <!-- AI Title & Description Generator -->
+  <section id="ai-title-desc" class="feature-section">
+    <h2>AI Title & Description Generator</h2>
+    <p>Type your video idea and AI will generate perfect SEO title & description.</p>
+  </section>
+
+  <!-- AI Tag Generator -->
+  <section id="ai-tag-generator" class="feature-section">
+    <h2>AI Tag Generator</h2>
+    <p>Generate trending and high-ranking tags for your YouTube videos.</p>
+  </section>
+
+  <!-- YouTube API Integration -->
+  <section id="yt-api" class="feature-section">
+    <h2>YouTube Direct Upload</h2>
+    <p>Login with YouTube and upload thumbnails or videos directly from the website.</p>
+    <button class="btn">Connect YouTube</button>
+  </section>
+
+</body>
+</html>
